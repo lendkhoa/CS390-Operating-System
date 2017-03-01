@@ -33,8 +33,8 @@ int main (int argc, char **argv)
      type "man 2 open" for explanation of modes
   */
   int memory_handle = shm_open (segment_name, 
-				O_RDWR | O_CREAT | O_TRUNC, 
-				S_IRWXU);
+        O_RDWR | O_CREAT | O_TRUNC, 
+        S_IRWXU);
   /* Check for errors */
   if (memory_handle == -1) {
     /* perror () prints its argument and then an explanation of the
@@ -56,22 +56,22 @@ int main (int argc, char **argv)
                   fd, off_t offset);
   */
   void *segment_addr = mmap (NULL,  /* have kernel assign address */
-			     sizeof (SHARED_MEM), /* size of area to map */
-			     PROT_WRITE | PROT_READ, /* Allow this
-							process to
-							read and write
-							the memory */
-			     MAP_SHARED, /* allow other processes to
-					    see changes to this memory
-					    immediately */
-			     memory_handle, /* the shared memory
-					       handle; this is the
-					       area of kernel memory
-					       to map into this
-					       process's address
-					       space */
-			     0); /* begin mapping at start (offset 0)
-				    of memory_handle */
+           sizeof (SHARED_MEM), /* size of area to map */
+           PROT_WRITE | PROT_READ, /* Allow this
+              process to
+              read and write
+              the memory */
+           MAP_SHARED, /* allow other processes to
+              see changes to this memory
+              immediately */
+           memory_handle, /* the shared memory
+                 handle; this is the
+                 area of kernel memory
+                 to map into this
+                 process's address
+                 space */
+           0); /* begin mapping at start (offset 0)
+            of memory_handle */
 
   if (segment_addr == (void *) -1) {
     perror ("mmap");
