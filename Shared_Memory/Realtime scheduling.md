@@ -17,5 +17,11 @@ scheduling policy and a process that is assigned First Come First Serve
 is that in the former case, the process is automatically booted off the 
 CPU after a certain amount of time
 
+### Shared Memory
+ When a new shared memory object is created it is given the owner and group corresponding to the effec-
+tive user and group of the calling process. There is no visible entry in the file system for the cre-
+ated object in this implementation.
 
+When a shared memory object is created, it persists until it it unlinked and all other references are
+gone. Objects do not persist across a system reboot.
 
