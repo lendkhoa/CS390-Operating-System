@@ -81,7 +81,6 @@ int main (int argc, char **argv)
   /* At this point, we have a chunk of shared memory.  To access it,
      we have to superimpose some structure on it. */
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
-
   /* Now we can treat the shared memory like it is a struct of type
      SHARED_MEM.  Grab a string from the user, and store it in the
      shared memory. */
