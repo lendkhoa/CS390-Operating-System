@@ -2,7 +2,7 @@
 to be unique on the system, so it should include your name.  In
 addition, it can contain only alphanumeric chars and
 underscores.  */
-char *segment_name = "/le4_shared_memory_segment"; 
+char *segment_name = "/le6_shared_memory_segment"; 
 
 /* The maximum message size we can store in the segment. */
 #define MAX_MESG_SIZE 1024

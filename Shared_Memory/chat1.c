@@ -13,6 +13,11 @@
 #include <errno.h>
 
 /* Shared definitions */
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+#include <semaphore.h>
+
 #include "shm.h"
 
 void signal_callback_handler(int signum)
@@ -31,42 +36,51 @@ void signal_callback_handler(int signum)
 }
 
 int main (int argc, char *argv[]) {
-	signal(SIGINT, signal_callback_handler);
-	int memory_handle = shm_open (segment_name, O_CREAT | O_RDWR, S_IRWXU | S_IRWXG);
-	if (memory_handle == -1) {
-		perror ("shm_open");
-		exit (-1);
-	}
+	int memory_handle;
+    int vol, cur;
+    int shared_seg_size = (1 * sizeof(SHARED_MEM));   /* want shared segment capable of storing 1 message */
+    sem_t *sema; /* pointer to sem */
+    int val;
 
-	void *segment_addr = mmap (NULL, 
-			     sizeof (SHARED_MEM),
-			     PROT_READ | PROT_WRITE,
-			     MAP_SHARED, 
-			     memory_handle,
-			     0);
-	if (segment_addr == (void *) -1) {
-	perror ("mmap");
-	exit (-1);
-	}
+    signal(SIGINT, signal_callback_handler);
 
-	SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
+    /* creating the shared memory object    --  shm_open()  */
+    memory_handle = shm_open(segment_name, O_CREAT | O_RDWR, S_IRWXU | S_IRWXG);
+    if (memory_handle < 0)
+    {
+        perror("In shm_open()");
+        exit(1);
+    }
 
-	while(1){
-		printf ("Shared memory contained a string of %d characters:\n",
+    ftruncate(memory_handle, shared_seg_size);
+
+    /* requesting the shared segment    --  mmap() */
+    void *segment_addr = mmap(NULL, shared_seg_size, PROT_READ | PROT_WRITE, MAP_SHARED, memory_handle, 0);
+    if (segment_addr == (void *) -1)
+    {
+        perror("In mmap()");
+        exit(1);
+    }
+
+    /*superimpose the structure */
+    SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
+    
+    while(1)
+    {
+    	printf ("Shared memory contained a string of %d characters:\n",
 		chunk->mesg_size);
-		printf ("\"%s\"\n", chunk->mesg);
-		sleep(3);
-	}
+		printf("chat0 : %s\n", chunk->mesg);
 
-	if (munmap (segment_addr, sizeof (SHARED_MEM)) == -1) {
-		perror ("munmap");
-		exit (-1);
-	}
+    	printf ("Please enter some text to send to 0 (max %d chars): ", MAX_MESG_SIZE);
+    	gets (chunk->mesg);
+  		chunk->mesg_size = strlen (chunk->mesg);
+  		if (!strcmp(chunk->mesg, "END")) { exit(-1); }
+    }
 
-	if (shm_unlink (segment_name) == -1) {
-		perror ("shm_unlink");
-		exit (-1);
-	}
+    if (shm_unlink(segment_name) != 0) {
+        perror("In shm_unlink()");
+        exit(1);
+    }
 
-	exit(0);
+    return 0;
 }
