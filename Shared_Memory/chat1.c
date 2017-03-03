@@ -14,7 +14,7 @@
 
 /* Shared definitions */
 #include "shm.h"
-sem_t * sem_id;
+//sem_t * sem_id;
 
 /* POSIX is part of the linux "real-time" library, so you need to
    compile with -lrt. */
@@ -53,10 +53,10 @@ int main (int argc, char **argv)
 	// chunk->mesg_size = strlen (chunk->mesg);
  }
 
- if (munmap (segment_addr, sizeof (SHARED_MEM))) {
-    perror ("munmap");
-    exit (-1);
- }
+ //if (munmap (segment_addr, sizeof (SHARED_MEM))) {
+   // perror ("munmap");
+   // exit (-1);
+ //}
 
  shm_unlink (memory_handle);
 
