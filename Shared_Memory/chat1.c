@@ -2,10 +2,10 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-/* To get strnlen(), memcpy(), etc. */
+#include <unistd.h>
+#include <sys/types.h>
 #include <string.h> 
-
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -15,58 +15,34 @@
 /* Shared definitions */
 #include "shm.h"
 
-void signal_callback_handler(int signum)
+/* POSIX is part of the linux "real-time" library, so you need to
+   compile with -lrt. */
+int main (int argc, char **argv)
 {
+  
+  int memory_handle = shm_open (segment_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG);
+  /* Check for errors */
+  if (memory_handle == -1) {
+    perror("shm_open");
+    exit (-1);
+  }
 
-        /**
-         * Semaphore unlink: Remove a named semaphore  from the system.
-         */
-        if ( shm_unlink("/mysem") < 0 )
-        {
-                perror("shm_unlink");
-        }
+  void *segment_addr = mmap (NULL, sizeof (SHARED_MEM), PROT_WRITE | PROT_READ, MAP_SHARED, memory_handle, 0);
 
-   // Terminate program
-   exit(signum);
-}
+  if (shm_unlink (segment_name) == -1) {
+    perror ("shm_unlink");
+    exit (-1);
+  }
 
-int main (int argc, char *argv[]) {
-	signal(SIGINT, signal_callback_handler);
-	int memory_handle = shm_open (segment_name, O_CREAT | O_RDWR, S_IRWXU | S_IRWXG);
-	if (memory_handle == -1) {
-		perror ("shm_open");
-		exit (-1);
-	}
+  SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
 
-	void *segment_addr = mmap (NULL, 
-			     sizeof (SHARED_MEM),
-			     PROT_READ | PROT_WRITE,
-			     MAP_SHARED, 
-			     memory_handle,
-			     0);
-	if (segment_addr == (void *) -1) {
-	perror ("mmap");
-	exit (-1);
-	}
+  while(1) {
+	printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
+	gets (chunk->mesg);
+	if (!strcmp(chunk->mesg, "END")) exit(0);
 
-	SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
+	chunk->mesg_size = strlen (chunk->mesg);
+  }
 
-	while(1){
-		printf ("Shared memory contained a string of %d characters:\n",
-		chunk->mesg_size);
-		printf ("\"%s\"\n", chunk->mesg);
-		sleep(3);
-	}
-
-	if (munmap (segment_addr, sizeof (SHARED_MEM)) == -1) {
-		perror ("munmap");
-		exit (-1);
-	}
-
-	if (shm_unlink (segment_name) == -1) {
-		perror ("shm_unlink");
-		exit (-1);
-	}
-
-	exit(0);
+  exit (0);
 }
