@@ -21,46 +21,39 @@
 int main (int argc, char **argv)
 {
   
-  int memory_handle = shm_open (segment_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG);
+  int memory_handle = shm_open (segment_name, 
+				O_RDWR | O_CREAT | O_TRUNC, 
+				S_IRWXU);
   /* Check for errors */
   if (memory_handle == -1) {
     perror("shm_open");
     exit (-1);
   }
 
-  void *segment_addr = mmap (NULL, sizeof (SHARED_MEM), PROT_WRITE | PROT_READ, MAP_SHARED, memory_handle, 0);
+  if (ftruncate (memory_handle, sizeof(SHARED_MEM)) == -1) {
+    perror ("ftruncate");
+    exit (-1);
+  }
+
+  void *segment_addr = mmap (NULL,
+			     sizeof (SHARED_MEM), 
+			     PROT_WRITE | PROT_READ, 
+			     MAP_SHARED,
+			     memory_handle,
+			     0);
+
   if (segment_addr == (void *) -1) {
     perror ("mmap");
     exit (-1);
   }
 
+  /* At this point, we have a chunk of shared memory.  To access it,
+     we have to superimpose some structure on it. */
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
- // sem_id = sem_init(sem_id, 1, 0);
 
-  while(1) {
-  	//sem_wait(sem_id);
-
-    printf ("Shared memory contained a string of %d characters:\n",
-    chunk->mesg_size);
-    printf ("\"%s\"\n", chunk->mesg);
-
-    //sem_post(sem_id);
-
-	// printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
-	// gets (chunk->mesg);
-	// if (!strcmp(chunk->mesg, "END")) exit(0);
-	// chunk->mesg_size = strlen (chunk->mesg);
- }
-
- //if (munmap (segment_addr, sizeof (SHARED_MEM))) {
-   // perror ("munmap");
-   // exit (-1);
- //}
-
-if (shm_unlink (memory_handle) == -1) {
-    perror ("shm_unlink");
-    exit (-1);
-  }
+  printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
+  gets (chunk->mesg);
+  chunk->mesg_size = strlen (chunk->mesg);
 
   exit (0);
 }

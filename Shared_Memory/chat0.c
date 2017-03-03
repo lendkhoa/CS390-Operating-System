@@ -16,51 +16,42 @@ sem_t * sem_id;
 /* Shared definitions */
 #include "shm.h"
 
-/* POSIX is part of the linux "real-time" library, so you need to
-   compile with -lrt. */
 int main (int argc, char **argv)
 {
   
-  int memory_handle = shm_open (segment_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG);
-  /* Check for errors */
+  int memory_handle = shm_open (segment_name, O_RDWR, 0);
   if (memory_handle == -1) {
-    perror("shm_open");
+    perror ("shm_open");
     exit (-1);
   }
 
- if (ftruncate (memory_handle, sizeof(SHARED_MEM))) {
-    perror ("ftruncate");
+ /* Map shared memory segment into this process's address space. */
+  void *segment_addr = mmap (NULL, 
+           sizeof (SHARED_MEM),
+           PROT_READ | PROT_WRITE,
+           MAP_SHARED, 
+           memory_handle,
+           0);
+  if (segment_addr == (void *) -1) {
+    perror ("mmap");
     exit (-1);
   }
 
-  void *segment_addr = mmap (NULL, sizeof (SHARED_MEM), PROT_WRITE | PROT_READ, MAP_SHARED, memory_handle, 0);
+  SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
+
+  printf ("Shared memory contained a string of %d characters:\n",
+    chunk->mesg_size);
+  printf ("\"%s\"\n", chunk->mesg);
+
+  if (munmap (segment_addr, sizeof (SHARED_MEM)) == -1) {
+    perror ("munmap");
+    exit (-1);
+  }
 
   if (shm_unlink (segment_name) == -1) {
     perror ("shm_unlink");
     exit (-1);
   }
 
-  SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
-  //sem_id = sem_init(sem_id, 1, 0);
-
-  while(1) {
-    //sem_wait(sem_id);
-
-    printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
-    gets (chunk->mesg);
-    if (!strcmp(chunk->mesg, "END")) exit(0);
-
-    chunk->mesg_size = strlen (chunk->mesg);
-
-   // sem_post(sem_id);
-  }
-
-  if (munmap (segment_addr, sizeof (SHARED_MEM))) {
-    perror ("munmap");
-    exit (-1);
-  }
-
-  shm_unlink (memory_handle);
-
-  exit (0);
+  exit(0);
 }
