@@ -29,9 +29,8 @@ int main (int argc, char **argv)
   }
 
   void *segment_addr = mmap (NULL, sizeof (SHARED_MEM), PROT_WRITE | PROT_READ, MAP_SHARED, memory_handle, 0);
-
-  if (shm_unlink (segment_name) == -1) {
-    perror ("shm_unlink");
+  if (segment_addr == (void *) -1) {
+    perror ("mmap");
     exit (-1);
   }
 
@@ -58,7 +57,10 @@ int main (int argc, char **argv)
    // exit (-1);
  //}
 
- shm_unlink (memory_handle);
+if (shm_unlink (memory_handle) == -1) {
+    perror ("shm_unlink");
+    exit (-1);
+  }
 
   exit (0);
 }
