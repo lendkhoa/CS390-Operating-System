@@ -11,6 +11,7 @@
 
 /* To get perror() */
 #include <errno.h>
+sem_t * sem_id;
 
 /* Shared definitions */
 #include "shm.h"
@@ -40,15 +41,30 @@ int main (int argc, char **argv)
   }
 
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
+  sem_id = sem_init(sem_id, 1, 0);
 
   while(1) {
-  	printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
-  	gets (chunk->mesg);
-  	if (!strcmp(chunk->mesg, "END")) exit(0);
+    sem_wait(sem_id);
 
-  	chunk->mesg_size = strlen (chunk->mesg);
-    sleep(3);
+    printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
+    gets (chunk->mesg);
+    if (!strcmp(chunk->mesg, "END")) exit(0);
+
+    chunk->mesg_size = strlen (chunk->mesg);
+
+    sem_post(sem_id);
   }
+
+  if (munmap (segment_addr, sizeof (SHARED_MEM)) == -1) {
+    perror ("munmap");
+    exit (-1);
+  }
+
+  if (shm_unlink (memory_handle) == -1) {
+    perror ("shm_unlink");
+    exit (-1);
+  }
+
 
   exit (0);
 }
