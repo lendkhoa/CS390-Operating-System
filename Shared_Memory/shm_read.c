@@ -19,11 +19,11 @@ int main (int argc, char **argv)
 
  /* Map shared memory segment into this process's address space. */
   void *segment_addr = mmap (NULL, 
-           sizeof (SHARED_MEM),
-           PROT_READ | PROT_WRITE,
-           MAP_SHARED, 
-           memory_handle,
-           0);
+			     sizeof (SHARED_MEM),
+			     PROT_READ | PROT_WRITE,
+			     MAP_SHARED, 
+			     memory_handle,
+			     0);
   if (segment_addr == (void *) -1) {
     perror ("mmap");
     exit (-1);
@@ -35,7 +35,7 @@ int main (int argc, char **argv)
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
 
   printf ("Shared memory contained a string of %d characters:\n",
-    chunk->mesg_size);
+	  chunk->mesg_size);
   printf ("\"%s\"\n", chunk->mesg);
 
   /* Finally, unmap the shared memory segment from our address
