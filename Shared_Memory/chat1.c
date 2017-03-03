@@ -36,16 +36,16 @@ int main (int argc, char **argv)
   }
 
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
-  sem_id = sem_init(sem_id, 1, 0);
+ // sem_id = sem_init(sem_id, 1, 0);
 
   while(1) {
-  	sem_wait(sem_id);
+  	//sem_wait(sem_id);
 
-	printf ("Shared memory contained a string of %d characters:\n",
-	  chunk->mesg_size);
-	printf ("\"%s\"\n", chunk->mesg);
+    printf ("Shared memory contained a string of %d characters:\n",
+    chunk->mesg_size);
+    printf ("\"%s\"\n", chunk->mesg);
 
-	sem_post(sem_id);
+    //sem_post(sem_id);
 
 	// printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
 	// gets (chunk->mesg);

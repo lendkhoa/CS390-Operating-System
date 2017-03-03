@@ -41,10 +41,10 @@ int main (int argc, char **argv)
   }
 
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
-  sem_id = sem_init(sem_id, 1, 0);
+  //sem_id = sem_init(sem_id, 1, 0);
 
   while(1) {
-    sem_wait(sem_id);
+    //sem_wait(sem_id);
 
     printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
     gets (chunk->mesg);
@@ -52,7 +52,7 @@ int main (int argc, char **argv)
 
     chunk->mesg_size = strlen (chunk->mesg);
 
-    sem_post(sem_id);
+   // sem_post(sem_id);
   }
 
   if (munmap (segment_addr, sizeof (SHARED_MEM))) {
