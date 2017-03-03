@@ -55,16 +55,12 @@ int main (int argc, char **argv)
     sem_post(sem_id);
   }
 
-  if (munmap (segment_addr, sizeof (SHARED_MEM)) == -1) {
+  if (munmap (segment_addr, sizeof (SHARED_MEM))) {
     perror ("munmap");
     exit (-1);
   }
 
-  if (shm_unlink (memory_handle) == -1) {
-    perror ("shm_unlink");
-    exit (-1);
-  }
-
+  shm_unlink (memory_handle);
 
   exit (0);
 }
