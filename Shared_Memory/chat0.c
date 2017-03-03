@@ -42,11 +42,12 @@ int main (int argc, char **argv)
   SHARED_MEM *chunk = (SHARED_MEM *) segment_addr;
 
   while(1) {
-	printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
-	gets (chunk->mesg);
-	if (!strcmp(chunk->mesg, "END")) exit(0);
+  	printf ("Please enter some text (max %d chars): ", MAX_MESG_SIZE);
+  	gets (chunk->mesg);
+  	if (!strcmp(chunk->mesg, "END")) exit(0);
 
-	chunk->mesg_size = strlen (chunk->mesg);
+  	chunk->mesg_size = strlen (chunk->mesg);
+    sleep(3);
   }
 
   exit (0);
