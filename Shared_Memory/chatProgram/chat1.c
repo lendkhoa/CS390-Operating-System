@@ -1,6 +1,6 @@
 /*
  * Project 1 shared memory and semaphore 
- * Khoa Le
+ * Khoa Le, Truc Ha
  * Dr. Matthews
  */
 
