@@ -1,3 +1,9 @@
+/*
+ * Project 1 shared memory and semaphore 
+ * Khoa Le
+ * Dr. Matthews
+ */
+
 /* For shm* functions */
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -36,7 +42,12 @@ int main (int argc, char **argv)
    exit (-1);
  }
 
- void *segment_addr = mmap (NULL,sizeof(SHARED_MEM), PROT_WRITE | PROT_READ, MAP_SHARED, memory_handle,0);
+ void *segment_addr = mmap (NULL,
+			    sizeof(SHARED_MEM), 
+			    PROT_WRITE | PROT_READ, 
+                            MAP_SHARED, 
+                            memory_handle, 
+                            0);
 
  if (segment_addr == (void *) -1) {
     perror ("mmap");
@@ -49,18 +60,30 @@ int main (int argc, char **argv)
  
  while (1) {
   sem_wait(&chunk->sema);
+  
   if((chunk->mesg_size) != 0) {
    printf("Chat1 says: %s\n", chunk->mesg);
   }
   printf ("Please enter some text to send to 1 (max %d chars): ", MAX_MESG_SIZE);
   fgets (chunk->mesg, 1024, stdin);
+  
   chunk->mesg_size = strlen (chunk->mesg);
   if (strcmp("END\n", chunk->mesg) == 0) {
    exit(0);
   }
-  sem_post(&chunk->sema1);
-    
+  
+  sem_post(&chunk->sema1);  
+ }
+ 
+ if (munmap (segment_addr, sizeof (SHARED_MEM)) == -1) {
+    perror ("munmap");
+    exit (-1);
+  }
+
+ if (shm_unlink (segment_name) == -1) {
+    perror ("shm_unlink");
+    exit (-1);
  }
 
-  exit (0);
+ exit (0);
 }
