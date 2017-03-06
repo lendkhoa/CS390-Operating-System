@@ -64,12 +64,16 @@ int main (int argc, char **argv)
   if((chunk->mesg_size) != 0) {
    printf("Chat1 says: %s\n", chunk->mesg);
   }
+  if (strcmp("END\n", chunk->mesg) == 0) {
+   break;
+  }
   printf ("Please enter some text to send to 1 (max %d chars): ", MAX_MESG_SIZE);
   fgets (chunk->mesg, 1024, stdin);
   
   chunk->mesg_size = strlen (chunk->mesg);
   if (strcmp("END\n", chunk->mesg) == 0) {
-   exit(0);
+   sem_post(&chunk->sema1);
+   break;
   }
   
   sem_post(&chunk->sema1);  
@@ -79,11 +83,6 @@ int main (int argc, char **argv)
     perror ("munmap");
     exit (-1);
   }
-
- if (shm_unlink (segment_name) == -1) {
-    perror ("shm_unlink");
-    exit (-1);
- }
 
  exit (0);
 }

@@ -40,14 +40,19 @@ int main (int argc, char **argv)
     sem_wait(&chunk->sema1);
     
     printf ("Chat0 says: %s\n", chunk->mesg);
+    if (strcmp(chunk->mesg, "END\n") == 0) {
+     break;
+    }
+
     printf ("Please enter some text to send to 0 (max %d chars): ", MAX_MESG_SIZE);
     
     fgets(chunk->mesg, 1024, stdin);
     chunk->mesg_size = strlen (chunk->mesg);
     if (strcmp(chunk->mesg, "END\n") == 0) {
-     exit(0);
+     sem_post(&chunk->sema); 
+     break;
     }
-    
+   
     sem_post(&chunk->sema); 
   }
 
