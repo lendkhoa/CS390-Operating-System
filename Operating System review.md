@@ -10,3 +10,12 @@
 ### Processing Memory Reference
 
 ![](img/processingMemoryReference.png)
+
+### Process elements
+**text** shared by all threads
+
+**data** shared by all threads
+
+**heap** shared by all threads
+
+**stack** contains at least the return address, dynamically allocated variable
